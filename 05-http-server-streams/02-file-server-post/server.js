@@ -5,7 +5,6 @@ const fs = require('fs');
 
 const server = new http.Server();
 const LimitSizeStream = require('./LimitSizeStream');
-const limitedStream = new LimitSizeStream({ limit: 1000000 });
 
 server.on('request', (req, res) => {
     const pathname = url.parse(req.url).pathname.slice(1);
@@ -19,27 +18,23 @@ server.on('request', (req, res) => {
                 return;
             }
 
+            const limitedStream = new LimitSizeStream({ limit: 1000000 });
             const writeStream = fs.createWriteStream(filepath, {
                 flags: 'wx',
             });
 
             req.pipe(limitedStream)
-                .on('error', (error) => {
+                .on('error', async (error) => {
                     if (error.code === 'LIMIT_EXCEEDED') {
                         res.statusCode = 413;
                         res.end('File is too big');
+                        await deleteTheFile(filepath);
                         return;
                     }
 
                     res.statusCode = 500;
                     res.end('Internal server error');
-                })
-                .on('close', async () => {
-                    if (res.finished) {
-                        await deleteTheFile(filepath);
-                        stream.destroy();
-                        return;
-                    }
+                    await deleteTheFile(filepath);
                 })
                 .pipe(writeStream)
                 .on('error', (error) => {
@@ -51,19 +46,16 @@ server.on('request', (req, res) => {
 
                     res.statusCode = 500;
                     res.end('Internal server error');
+                    deleteTheFile(filepath);
                 })
-                .on('close', async () => {
-                    if (res.finished) {
-                        await deleteTheFile(filepath);
-                        stream.destroy();
-                        return;
-                    }
-                })
-                .on('end', () => {
+                .on('close', () => {
                     res.statusCode = 201;
                     res.end('Created');
                 });
-
+            res.on('close', async (err) => {
+                if (res.finished) return;
+                await deleteTheFile(filepath);
+            });
             break;
 
         default:
