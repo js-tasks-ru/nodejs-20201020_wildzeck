@@ -1,5 +1,6 @@
 const Product = require('../models/Product');
 const mongoose = require('mongoose');
+const Category = require('../models/Category');
 
 module.exports.productsBySubcategory = async function productsBySubcategory(
     ctx,
@@ -20,7 +21,7 @@ module.exports.productsBySubcategory = async function productsBySubcategory(
             products: productsBySubcategory,
         };
     } else {
-        ctx.response.status = 404;
+        ctx.response.status = 200;
         ctx.response.body = {
             products: [],
         };
