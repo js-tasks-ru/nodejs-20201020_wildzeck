@@ -8,4 +8,9 @@ module.exports.productsByQuery = async function productsByQuery(ctx, next) {
     ctx.response.body = {
         products: productsByQuery.length ? productsByQuery : [],
     };
+<<<<<<< HEAD
 };
+=======
+};
+
+>>>>>>> c04f697fb892444560e5335f807d8e50b58743cd
