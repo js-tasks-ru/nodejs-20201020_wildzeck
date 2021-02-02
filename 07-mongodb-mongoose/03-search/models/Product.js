@@ -41,3 +41,4 @@ productSchema.index(
 );
 
 module.exports = connection.model('Product', productSchema);
+
