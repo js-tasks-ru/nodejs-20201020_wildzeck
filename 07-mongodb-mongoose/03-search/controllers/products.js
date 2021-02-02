@@ -9,3 +9,4 @@ module.exports.productsByQuery = async function productsByQuery(ctx, next) {
         products: productsByQuery.length ? productsByQuery : [],
     };
 };
+
