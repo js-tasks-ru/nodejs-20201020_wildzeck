@@ -15,4 +15,3 @@ module.exports.messageList = async function messages(ctx, next) {
         })),
     };
 };
-
